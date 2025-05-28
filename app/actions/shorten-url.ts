@@ -1,7 +1,7 @@
 "use server"
 
 import { createServerClient } from "@/lib/supabase"
-import { generateShortCode, isValidUrl, formatUrl, isValidCustomCode } from "@/lib/utils/url-utils"
+import { generateShortCode, isValidUrl, formatUrl, isValidCustomCode, isLoopUrl } from "@/lib/utils/url-utils"
 import { headers } from "next/headers"
 
 interface ShortenUrlParams {
@@ -33,6 +33,14 @@ export async function shortenUrl({ originalUrl, customCode }: ShortenUrlParams):
     }
 
     const formattedUrl = formatUrl(originalUrl)
+
+    // Check for loop URLs (prevent redirecting to our own domain)
+    if (isLoopUrl(formattedUrl)) {
+      return {
+        success: false,
+        error: "Nelze zkrátit odkaz, který již směřuje na krátký.link - to by způsobilo nekonečnou smyčku",
+      }
+    }
 
     // Validate custom code if provided
     if (customCode && !isValidCustomCode(customCode)) {

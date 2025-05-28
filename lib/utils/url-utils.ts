@@ -28,3 +28,20 @@ export function isValidCustomCode(code: string): boolean {
   const regex = /^[a-zA-Z0-9_-]+$/
   return regex.test(code) && code.length >= 3 && code.length <= 50
 }
+
+export function isLoopUrl(url: string): boolean {
+  try {
+    const urlObj = new URL(url)
+    const hostname = urlObj.hostname.toLowerCase()
+
+    // Check if the URL points to our own domain
+    return (
+      hostname === "kratky.link" ||
+      hostname === "www.kratky.link" ||
+      hostname === "krátký.link" ||
+      hostname === "www.krátký.link"
+    )
+  } catch {
+    return false
+  }
+}
