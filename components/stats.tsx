@@ -45,13 +45,13 @@ export function Stats() {
 
   const statItems = [
     {
-      title: "Všechny odkazy",
+      title: "Celkem odkazů",
       value: stats.totalUrls.toLocaleString("cs-CZ"),
       icon: Link2,
       color: "text-blue-600",
     },
     {
-      title: "Všechny kliky",
+      title: "Celkem kliků",
       value: stats.totalClicks.toLocaleString("cs-CZ"),
       icon: MousePointer,
       color: "text-green-600",
