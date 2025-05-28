@@ -5,7 +5,6 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ExternalLink, Copy } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { supabase } from "@/lib/supabase"
 import { useToast } from "@/hooks/use-toast"
 
 interface RecentUrl {
@@ -21,22 +20,23 @@ interface RecentUrl {
 export function RecentUrls() {
   const [urls, setUrls] = useState<RecentUrl[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const { toast } = useToast()
 
   useEffect(() => {
     async function fetchRecentUrls() {
       try {
-        const { data, error } = await supabase
-          .from("urls")
-          .select("id, original_url, short_code, custom_code, clicks, created_at, title")
-          .eq("is_active", true)
-          .order("created_at", { ascending: false })
-          .limit(10)
+        const response = await fetch("/api/recent-urls")
 
-        if (error) throw error
-        setUrls(data || [])
+        if (!response.ok) {
+          throw new Error("Nepodařilo se načíst nejnovější odkazy")
+        }
+
+        const data = await response.json()
+        setUrls(data)
       } catch (error) {
         console.error("Error fetching recent URLs:", error)
+        setError("Nepodařilo se načíst nejnovější odkazy")
       } finally {
         setIsLoading(false)
       }
@@ -73,6 +73,17 @@ export function RecentUrls() {
 
   const truncateUrl = (url: string, maxLength = 50) => {
     return url.length > maxLength ? `${url.substring(0, maxLength)}...` : url
+  }
+
+  if (error) {
+    return (
+      <div>
+        <h3 className="text-3xl font-bold text-center text-gray-900 mb-12">Nejnovější odkazy</h3>
+        <div className="text-center py-12">
+          <p className="text-red-500">{error}</p>
+        </div>
+      </div>
+    )
   }
 
   if (isLoading) {

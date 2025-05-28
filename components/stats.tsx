@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Link2, MousePointer, CalendarPlus, BarChart3 } from "lucide-react"
-import { supabase } from "@/lib/supabase"
 
 interface StatsData {
   totalUrls: number
@@ -20,44 +19,22 @@ export function Stats() {
     todayClicks: 0,
   })
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchStats() {
       try {
-        // Get today's date range
-        const today = new Date()
-        const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate())
-        const todayEnd = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000)
+        const response = await fetch("/api/stats")
 
-        // Get total URLs count
-        const { count: totalUrls } = await supabase.from("urls").select("*", { count: "exact", head: true })
+        if (!response.ok) {
+          throw new Error("Nepodařilo se načíst statistiky")
+        }
 
-        // Get total clicks by summing all clicks from urls table
-        const { data: urlsData } = await supabase.from("urls").select("clicks")
-        const totalClicks = urlsData?.reduce((sum, url) => sum + (url.clicks || 0), 0) || 0
-
-        // Get today's URLs count
-        const { count: todayUrls } = await supabase
-          .from("urls")
-          .select("*", { count: "exact", head: true })
-          .gte("created_at", todayStart.toISOString())
-          .lt("created_at", todayEnd.toISOString())
-
-        // Get today's clicks count
-        const { count: todayClicks } = await supabase
-          .from("url_analytics")
-          .select("*", { count: "exact", head: true })
-          .gte("clicked_at", todayStart.toISOString())
-          .lt("clicked_at", todayEnd.toISOString())
-
-        setStats({
-          totalUrls: totalUrls || 0,
-          totalClicks,
-          todayUrls: todayUrls || 0,
-          todayClicks: todayClicks || 0,
-        })
+        const data = await response.json()
+        setStats(data)
       } catch (error) {
         console.error("Error fetching stats:", error)
+        setError("Nepodařilo se načíst statistiky")
       } finally {
         setIsLoading(false)
       }
@@ -92,6 +69,17 @@ export function Stats() {
       color: "text-orange-600",
     },
   ]
+
+  if (error) {
+    return (
+      <div>
+        <h3 className="text-3xl font-bold text-center text-gray-900 mb-12">Statistiky platformy</h3>
+        <div className="text-center py-12">
+          <p className="text-red-500">{error}</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div>
