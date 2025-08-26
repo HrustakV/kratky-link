@@ -1,6 +1,8 @@
 import { createServerClient } from "@/lib/supabase"
-import { redirect, notFound } from "next/navigation"
+import { notFound } from "next/navigation"
 import { headers } from "next/headers"
+import { RedirectCountdown } from "@/components/redirect-countdown"
+import type { Metadata } from "next"
 
 interface PageProps {
   params: {
@@ -71,6 +73,16 @@ async function trackClick(urlId: number, userAgent: string, referer: string, ipA
   }
 }
 
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { shortCode } = params
+
+  return {
+    title: `Přesměrování - ${shortCode}`,
+    description: "Budete přesměrováni na cílovou stránku",
+    robots: "noindex, nofollow",
+  }
+}
+
 export default async function RedirectPage({ params }: PageProps) {
   const { shortCode } = params
   const supabase = createServerClient()
@@ -106,6 +118,5 @@ export default async function RedirectPage({ params }: PageProps) {
   // Track the click asynchronously
   trackClick(urlData.id, userAgent, referer, clientIp).catch(console.error)
 
-  // Redirect to original URL
-  redirect(urlData.original_url)
+  return <RedirectCountdown targetUrl={urlData.original_url} shortCode={shortCode} />
 }
