@@ -48,6 +48,9 @@ export function RedirectCountdown({ targetUrl, shortCode }: RedirectCountdownPro
     return url.length > maxLength ? `${url.substring(0, maxLength)}...` : url
   }
 
+  // Calculate progress percentage (0 to 100)
+  const progress = ((5 - countdown) / 5) * 100
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
       {/* Header */}
@@ -70,17 +73,23 @@ export function RedirectCountdown({ targetUrl, shortCode }: RedirectCountdownPro
               {/* Background circle */}
               <div className="absolute inset-0 rounded-full border-8 border-gray-200 dark:border-gray-700"></div>
 
-              {/* Progress circle */}
-              <div
-                className="absolute inset-0 rounded-full border-8 border-blue-600 dark:border-blue-400 transition-all duration-1000 ease-linear"
-                style={{
-                  transform: "rotate(-90deg)",
-                  strokeDasharray: `${2 * Math.PI * 56}`,
-                  strokeDashoffset: `${2 * Math.PI * 56 * (countdown / 5)}`,
-                  borderRadius: "50%",
-                  background: `conic-gradient(from 0deg, #2563eb ${(5 - countdown) * 72}deg, transparent ${(5 - countdown) * 72}deg)`,
-                }}
-              ></div>
+              {/* Progress circle - only the border gets filled */}
+              <svg className="absolute inset-0 w-full h-full transform -rotate-90" viewBox="0 0 128 128">
+                <circle
+                  cx="64"
+                  cy="64"
+                  r="56"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="8"
+                  strokeLinecap="round"
+                  className="text-blue-600 dark:text-blue-400 transition-all duration-1000 ease-linear"
+                  style={{
+                    strokeDasharray: `${2 * Math.PI * 56}`,
+                    strokeDashoffset: `${2 * Math.PI * 56 * (1 - progress / 100)}`,
+                  }}
+                />
+              </svg>
 
               {/* Center content */}
               <div className="absolute inset-0 flex items-center justify-center">

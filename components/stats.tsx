@@ -13,13 +13,7 @@ interface StatsData {
 }
 
 export function Stats() {
-  const [stats, setStats] = useState<StatsData>({
-    totalUrls: 0,
-    totalClicks: 0,
-    todayUrls: 0,
-    todayClicks: 0,
-  })
-  const [isLoading, setIsLoading] = useState(true)
+  const [stats, setStats] = useState<StatsData | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -36,18 +30,21 @@ export function Stats() {
       } catch (error) {
         console.error("Error fetching stats:", error)
         setError("Nepodařilo se načíst statistiky")
-      } finally {
-        setIsLoading(false)
       }
     }
 
     fetchStats()
   }, [])
 
+  // Don't render anything until we have data or error
+  if (!stats && !error) {
+    return null
+  }
+
   const statItems = [
     {
       title: "Celkem odkazů",
-      value: stats.totalUrls,
+      value: stats?.totalUrls || 0,
       icon: Link2,
       color: "text-blue-600 dark:text-blue-400",
       bgColor: "bg-blue-50 dark:bg-blue-900/20",
@@ -55,7 +52,7 @@ export function Stats() {
     },
     {
       title: "Celkem kliků",
-      value: stats.totalClicks,
+      value: stats?.totalClicks || 0,
       icon: MousePointer,
       color: "text-green-600 dark:text-green-400",
       bgColor: "bg-green-50 dark:bg-green-900/20",
@@ -63,7 +60,7 @@ export function Stats() {
     },
     {
       title: "Dnešní odkazy",
-      value: stats.todayUrls,
+      value: stats?.todayUrls || 0,
       icon: CalendarPlus,
       color: "text-purple-600 dark:text-purple-400",
       bgColor: "bg-purple-50 dark:bg-purple-900/20",
@@ -71,7 +68,7 @@ export function Stats() {
     },
     {
       title: "Dnešní kliky",
-      value: stats.todayClicks,
+      value: stats?.todayClicks || 0,
       icon: BarChart3,
       color: "text-orange-600 dark:text-orange-400",
       bgColor: "bg-orange-50 dark:bg-orange-900/20",
@@ -105,7 +102,7 @@ export function Stats() {
             </CardHeader>
             <CardContent>
               <div className={`text-2xl font-bold ${item.color}`}>
-                {isLoading ? "..." : <AnimatedCounter end={item.value} />}
+                <AnimatedCounter end={item.value} />
               </div>
             </CardContent>
           </Card>
