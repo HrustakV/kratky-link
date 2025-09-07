@@ -94,19 +94,26 @@ export default async function RedirectPage({ params }: PageProps) {
   const realIp = headersList.get("x-real-ip")
   const clientIp = forwardedFor?.split(",")[0] || realIp || "127.0.0.1"
 
-  // Find URL by short code or custom code
+  // Find URL by short code or custom code - but prioritize exact matches
   const { data: urlData, error } = await supabase
     .from("urls")
-    .select("id, original_url, is_active, expires_at")
+    .select("id, original_url, is_active, expires_at, short_code, custom_code")
     .or(`short_code.eq.${shortCode},custom_code.eq.${shortCode}`)
+    .eq("is_active", true)
     .single()
 
-  if (error || !urlData) {
-    notFound()
+  // Additional validation to ensure we have the right record
+  if (urlData) {
+    // If we're looking for a custom code, make sure it matches exactly
+    const isCustomCode = urlData.custom_code === shortCode
+    const isShortCode = urlData.short_code === shortCode
+
+    if (!isCustomCode && !isShortCode) {
+      notFound()
+    }
   }
 
-  // Check if URL is active
-  if (!urlData.is_active) {
+  if (error || !urlData) {
     notFound()
   }
 

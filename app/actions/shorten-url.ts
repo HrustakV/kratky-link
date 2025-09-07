@@ -63,6 +63,7 @@ export async function shortenUrl({ originalUrl, customCode }: ShortenUrlParams):
         .from("urls")
         .select("id")
         .or(`short_code.eq.${generatedCode},custom_code.eq.${generatedCode}`)
+        .eq("is_active", true)
         .single()
 
       if (!existing) {
@@ -80,8 +81,9 @@ export async function shortenUrl({ originalUrl, customCode }: ShortenUrlParams):
     if (customCode) {
       const { data: existing } = await supabase
         .from("urls")
-        .select("id")
+        .select("id, short_code, custom_code")
         .or(`short_code.eq.${customCode},custom_code.eq.${customCode}`)
+        .eq("is_active", true)
         .single()
 
       if (existing) {

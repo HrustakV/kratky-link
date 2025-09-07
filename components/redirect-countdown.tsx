@@ -67,21 +67,35 @@ export function RedirectCountdown({ targetUrl, shortCode }: RedirectCountdownPro
           <CardContent className="p-8 text-center">
             {/* Countdown Circle */}
             <div className="relative w-32 h-32 mx-auto mb-8">
+              {/* Background circle */}
               <div className="absolute inset-0 rounded-full border-8 border-gray-200 dark:border-gray-700"></div>
+
+              {/* Progress circle */}
               <div
                 className="absolute inset-0 rounded-full border-8 border-blue-600 dark:border-blue-400 transition-all duration-1000 ease-linear"
                 style={{
-                  clipPath: `polygon(50% 50%, 50% 0%, ${50 + 50 * Math.cos((2 * Math.PI * (5 - countdown)) / 5 - Math.PI / 2)}% ${50 + 50 * Math.sin((2 * Math.PI * (5 - countdown)) / 5 - Math.PI / 2)}%, 50% 50%)`,
+                  transform: "rotate(-90deg)",
+                  strokeDasharray: `${2 * Math.PI * 56}`,
+                  strokeDashoffset: `${2 * Math.PI * 56 * (countdown / 5)}`,
+                  borderRadius: "50%",
+                  background: `conic-gradient(from 0deg, #2563eb ${(5 - countdown) * 72}deg, transparent ${(5 - countdown) * 72}deg)`,
                 }}
               ></div>
+
+              {/* Center content */}
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center">
-                  <div className="text-4xl font-bold text-blue-600 dark:text-blue-400">
-                    {isRedirecting ? <Clock className="h-8 w-8 animate-spin" /> : countdown}
-                  </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    {isRedirecting ? "Přesměrovávám..." : "sekund"}
-                  </div>
+                  {isRedirecting ? (
+                    <>
+                      <Clock className="h-8 w-8 animate-spin text-blue-600 dark:text-blue-400 mx-auto" />
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">Přesměrovávám...</div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="text-4xl font-bold text-blue-600 dark:text-blue-400">{countdown}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">sekund</div>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
